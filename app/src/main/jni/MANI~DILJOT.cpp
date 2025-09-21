@@ -223,8 +223,8 @@ ImGui::GetStyle().ScrollbarSize = 20.0f;
             
           //io.Fonts->AddFontFromMemoryTTF((void *)BaiduZY_data, BaiduZY_size, 30.0f, NULL, io.Fonts->GetGlyphRangesChineseFull());
           io.Fonts->AddFontFromMemoryTTF(const_cast<std::uint8_t*>(itsmkop), sizeof(itsmkop), 30.f, &CustomFont);
-		  io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size, 30.0f, &icons_config, icons_ranges);
-		  io.Fonts->AddFontFromMemoryTTF(const_cast<std::uint8_t*>(Custom), sizeof(Custom), 24.f, &CustomFont);
+                  io.Fonts->AddFontFromMemoryCompressedTTF(font_awesome_data, font_awesome_size, 30.0f, &icons_config, icons_ranges);
+                  io.Fonts->AddFontFromMemoryTTF(const_cast<std::uint8_t*>(Custom), sizeof(Custom), 24.f, &CustomFont);
          // memset(&Config, 0, sizeof(sConfig));
 //
 
@@ -315,16 +315,16 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
  // Window background = black
 
     ImGuiIO &io = ImGui::GetIO();
-	//Darkness();
-	// Thiết lập màu chủ đề
-	//ImVec4* colors = ImGui::GetStyle().Colors;
+        //Darkness();
+        // Thiết lập màu chủ đề
+        //ImVec4* colors = ImGui::GetStyle().Colors;
 
 
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplAndroid_NewFrame(g_GlWidth, g_GlHeight);
     ImGui::NewFrame();
-	if (ImGuiOK) {
-	    int touchCount = (((int (*)())(Class_Input__get_touchCount))());
+        if (ImGuiOK) {
+            int touchCount = (((int (*)())(Class_Input__get_touchCount))());
     if (touchCount > 0) {
         UnityEngine_Touch_Fields touch = ((UnityEngine_Touch_Fields(*)(int))(Class_Input__GetTouch))(0);
         float reverseY = io.DisplaySize.y - touch.m_Position.fields.y;
@@ -346,41 +346,200 @@ inline EGLBoolean hook_eglSwapBuffers(EGLDisplay dpy, EGLSurface surface) {
                 break;
         }
     }
-	}
-	
-	DrawESP(g_GlWidth, g_GlHeight);
-	
-	ImDrawList*draw = ImGui::GetBackgroundDrawList();
-/*	
-	//DILJOT~MANI~AIMKILL~HOOK
+        }
+        
+        DrawESP(g_GlWidth, g_GlHeight);
+        
+        ImDrawList*draw = ImGui::GetBackgroundDrawList();
+/*      
+        //DILJOT~MANI~AIMKILL~HOOK
 // @MANIx999 @DILJOT666         
 // If you give credit to your father, if you don't give credit to your father, then you will be my son, okay my son.
 */
-ImGui::SetNextWindowSize(ImVec2(500, 600), ImGuiCond_Once);
-if (ImGui::Begin(OBFUSCATE(" || MANI ~ DILJOT ~ TBM SHIVAM AIMKI || "), 0, ImGuiWindowFlags_NoBringToFrontOnFocus)) {
-   	            
-ImGui::TextColored(ImColor(10, 177, 255, 255),"AIMBOT SETTINGS");
-ImGui::Separator();
-ImGui::Checkbox("ENABLE AIMBOT", &Aimbot);
-ImGui::Spacing();
-ImGui::Checkbox("AimSilent", &SilentAim);
-ImGui::Spacing();
-ImGui::SliderFloat(("AIM FOV"), &Fov_Aim, 0.0f, 9000.0f, "%.0f°", ImGuiSliderFlags_AlwaysClamp | ImGuiSliderFlags_NoInput);
-ImGui::Checkbox("Aimkill Take", &AimKill1);
+// Premium DEXX-TER PRO - Compact Vertical Design
+static int selectedTab = 0;
 
-ImGui::Checkbox("ENABLE ESP", &Enable);
-ImGui::Checkbox("DRAW LINE", &Config.ESP.Line);
-ImGui::Checkbox("DRAW BOX", &Config.ESP.Box);
-ImGui::Checkbox("DRAW DISTANCE", &Config.ESP.Health);
-ImGui::Checkbox("DRAW HEALTH", &Config.ESP.Health);
+// Tab icon textures - declare as static so they persist
+static GLuint aimIconTexture = 0;
+static GLuint espIconTexture = 0; 
+static GLuint brutalIconTexture = 0;
+static bool iconsLoaded = false;
 
-ImGui::TextColored(ImColor(255, 255, 255, 255),"BRUTAL SETTINGS");
-ImGui::Separator();
-ImGui::Checkbox("ENABLE SPEED", &speedrun);
-ImGui::Spacing();
-ImGui::Separator();
-ImGui::Checkbox("Guest Reset ", &Reset);
+// Function to load texture from memory/assets
+GLuint LoadTextureFromFile(const char* filename) {
+    // This would normally load from assets, but for mod menu we'll use simple colored rectangles
+    // as actual file loading in Android mod environment can be complex
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    
+    // Create simple colored icon data (32x32 pixels)
+    unsigned char iconData[32 * 32 * 4]; // RGBA
+    
+    // Different colors for each icon
+    unsigned char r = 0, g = 0, b = 0;
+    if (strstr(filename, "AIM")) {
+        r = 150; g = 75; b = 200; // Purple for AIM
+    } else if (strstr(filename, "ESP")) {
+        r = 120; g = 60; b = 180; // Darker purple for ESP  
+    } else {
+        r = 180; g = 90; b = 255; // Lighter purple for BRUTAL
+    }
+    
+    // Fill with solid color
+    for (int i = 0; i < 32 * 32; i++) {
+        iconData[i * 4 + 0] = r;     // R
+        iconData[i * 4 + 1] = g;     // G
+        iconData[i * 4 + 2] = b;     // B
+        iconData[i * 4 + 3] = 255;   // A
+    }
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 32, 32, 0, GL_RGBA, GL_UNSIGNED_BYTE, iconData);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    return textureID;
 }
+
+// Compact optimized window
+ImGui::SetNextWindowSize(ImVec2(420, 320), ImGuiCond_Once);
+ImGui::SetNextWindowPos(ImVec2(50, 50), ImGuiCond_Once);
+
+// Premium purple styling - fully purple design
+ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 8.0f);
+ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 1.5f);
+ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.08f, 0.05f, 0.15f, 0.96f)); // Dark purple
+ImGui::PushStyleColor(ImGuiCol_Border, ImVec4(0.55f, 0.25f, 0.85f, 1.0f)); // Bright purple border
+ImGui::PushStyleColor(ImGuiCol_TitleBg, ImVec4(0.45f, 0.20f, 0.75f, 1.0f)); // Purple title bar
+ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImVec4(0.55f, 0.25f, 0.85f, 1.0f)); // Active purple title
+ImGui::PushStyleColor(ImGuiCol_TitleBgCollapsed, ImVec4(0.35f, 0.15f, 0.65f, 1.0f)); // Collapsed purple
+
+if (ImGui::Begin(OBFUSCATE("DEXX-TER PRO"), 0, ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoResize)) {
+    
+    // Load tab icons if not already loaded
+    if (!iconsLoaded) {
+        aimIconTexture = LoadTextureFromFile("AIM_icon");
+        espIconTexture = LoadTextureFromFile("ESP_icon");  
+        brutalIconTexture = LoadTextureFromFile("BRUTAL_icon");
+        iconsLoaded = true;
+    }
+    
+    // Compact layout with vertical tabs on left
+    ImGui::Columns(2, "MainLayout", false);
+    ImGui::SetColumnWidth(0, 60); // Left column for vertical tabs
+    
+    // === LEFT COLUMN - VERTICAL IMAGE TABS ===
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 6.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 6));
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 6));
+    
+    // AIM Tab - Image Button
+    if (selectedTab == 0) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.65f, 0.30f, 0.90f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.70f, 0.35f, 0.95f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.75f, 0.40f, 1.0f, 1.0f));
+    } else {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.12f, 0.35f, 0.8f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.35f, 0.18f, 0.45f, 0.9f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.45f, 0.22f, 0.55f, 1.0f));
+    }
+    if (ImGui::ImageButton((void*)(intptr_t)aimIconTexture, ImVec2(32, 32))) selectedTab = 0;
+    ImGui::PopStyleColor(3);
+    
+    // ESP Tab - Image Button
+    if (selectedTab == 1) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.65f, 0.30f, 0.90f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.70f, 0.35f, 0.95f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.75f, 0.40f, 1.0f, 1.0f));
+    } else {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.12f, 0.35f, 0.8f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.35f, 0.18f, 0.45f, 0.9f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.45f, 0.22f, 0.55f, 1.0f));
+    }
+    if (ImGui::ImageButton((void*)(intptr_t)espIconTexture, ImVec2(32, 32))) selectedTab = 1;
+    ImGui::PopStyleColor(3);
+    
+    // BRUTAL Tab - Image Button
+    if (selectedTab == 2) {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.65f, 0.30f, 0.90f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.70f, 0.35f, 0.95f, 1.0f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.75f, 0.40f, 1.0f, 1.0f));
+    } else {
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0.25f, 0.12f, 0.35f, 0.8f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.35f, 0.18f, 0.45f, 0.9f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.45f, 0.22f, 0.55f, 1.0f));
+    }
+    if (ImGui::ImageButton((void*)(intptr_t)brutalIconTexture, ImVec2(32, 32))) selectedTab = 2;
+    ImGui::PopStyleColor(3);
+    
+    ImGui::PopStyleVar(3);
+    
+    // === RIGHT COLUMN - CONTENT AREA ===
+    ImGui::NextColumn();
+    
+    // Compact content styling
+    ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
+    ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 4));
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 3));
+    
+    // Purple styling for all elements
+    ImGui::PushStyleColor(ImGuiCol_CheckMark, ImVec4(0.85f, 0.45f, 1.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImVec4(0.65f, 0.30f, 0.90f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_SliderGrabActive, ImVec4(0.85f, 0.45f, 1.0f, 1.0f));
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.20f, 0.10f, 0.30f, 0.8f));
+    ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, ImVec4(0.30f, 0.15f, 0.40f, 0.9f));
+    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImVec4(0.40f, 0.20f, 0.50f, 1.0f));
+    
+    // Title for current tab
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.85f, 0.50f, 1.0f, 1.0f));
+    switch (selectedTab) {
+        case 0: ImGui::Text("AIM"); break;
+        case 1: ImGui::Text("ESP"); break;
+        case 2: ImGui::Text("BRUTAL"); break;
+    }
+    ImGui::PopStyleColor();
+    ImGui::Separator();
+    
+    // Tab content - optimized and compact
+    switch (selectedTab) {
+        case 0: // AIM Tab
+            ImGui::Checkbox("Aimbot", &Aimbot);
+            ImGui::Checkbox("Silent", &SilentAim);
+            ImGui::Text("FOV:");
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(120);
+            ImGui::SliderFloat("##FOV", &Fov_Aim, 0.0f, 360.0f, "%.0f°", ImGuiSliderFlags_AlwaysClamp);
+            ImGui::Checkbox("Aimkill", &AimKill1);
+            break;
+            
+        case 1: // ESP Tab
+            ImGui::Checkbox("Enable", &Enable);
+            ImGui::Checkbox("Line", &Config.ESP.Line);
+            ImGui::Checkbox("Box", &Config.ESP.Box);
+            ImGui::Checkbox("Distance", &Config.ESP.Health);
+            ImGui::Checkbox("Health", &Config.ESP.Health);
+            break;
+            
+        case 2: // BRUTAL Tab
+            ImGui::Checkbox("Speed", &speedrun);
+            ImGui::Checkbox("Reset", &Reset);
+            break;
+    }
+    
+    // Footer
+    ImGui::SetCursorPosY(ImGui::GetWindowHeight() - 25);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.60f, 0.30f, 0.80f, 0.7f));
+    ImGui::Text("v3.2 Pro");
+    ImGui::PopStyleColor();
+    
+    ImGui::PopStyleColor(6);
+    ImGui::PopStyleVar(3);
+    ImGui::Columns(1); // Reset columns
+}
+
+ImGui::PopStyleColor(5);
+ImGui::PopStyleVar(3);
 
         
     
@@ -421,7 +580,7 @@ inline void StartGUI() {
     if (NULL != ptr_eglSwapBuffer) {
         DobbyHook((void *)ptr_eglSwapBuffer, (void*)hook_eglSwapBuffers, (void**)&old_eglSwapBuffers);
             LOGD("Gui Started");
-			hack_injec();
+                        hack_injec();
         }
     }
 
@@ -557,13 +716,13 @@ bool is_current_process(const char* target_name) {
 
 
 void hack_injec() {
-	while (!unityMap.isValid()) {
+        while (!unityMap.isValid()) {
         unityMap = KittyMemory::getLibraryBaseMap("libunity.so");
-		anogsMap = KittyMemory::getLibraryBaseMap("libanogs.so");
-		il2cppMap = KittyMemory::getLibraryBaseMap("libil2cpp.so");
-		
+                anogsMap = KittyMemory::getLibraryBaseMap("libanogs.so");
+                il2cppMap = KittyMemory::getLibraryBaseMap("libil2cpp.so");
+                
         sleep(6);
-	}
+        }
     
  sleep(5);
     Il2CppAttach();
@@ -576,27 +735,27 @@ void hack_injec() {
     
         
 
-	 
-	
-	//aim silent v2
+         
+        
+        //aim silent v2
  DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW.GamePlay"), OBFUSCATE("Weapon"), OBFUSCATE("OnCalcDamageOrHealing"), 1), (void *) BLAGCMCGEJG1,(void **) &old_BLAGCMCGEJG1);
-	
-	
+        
+        
 DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW.GamePlay"), OBFUSCATE("Player"), OBFUSCATE("UpdateBehavior"), 2), (void *) _LateUpdate, (void **) &LateUpdate);
-	//aimsilent
-	DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW.GamePlay"), OBFUSCATE("PlayerNetwork"), OBFUSCATE("TakeDamage"), 9), (void *) &hook_PlayerNetwork_TakeDamage, (void **) &orig_PlayerNetwork_TakeDamage);
+        //aimsilent
+        DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW.GamePlay"), OBFUSCATE("PlayerNetwork"), OBFUSCATE("TakeDamage"), 9), (void *) &hook_PlayerNetwork_TakeDamage, (void **) &orig_PlayerNetwork_TakeDamage);
         // Speed Run
        // Speed Run
    DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW.GamePlay"), OBFUSCATE("Player"), OBFUSCATE("IsFoldWingGliding"), 0), (void *) _IsFoldWingGliding, (void **)& IsFoldWingGliding);
-	DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("message"), OBFUSCATE("ProtoUtil"), OBFUSCATE("MappingFromPhysXState"), 1), (void *) _LEBIPIGPEEP, (void **)& LEBIPIGPEEP);
+        DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("message"), OBFUSCATE("ProtoUtil"), OBFUSCATE("MappingFromPhysXState"), 1), (void *) _LEBIPIGPEEP, (void **)& LEBIPIGPEEP);
     // ResetGuest
     DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW"), OBFUSCATE("GameConfig") , OBFUSCATE("get_ResetGuest"), 0), (void *) ResetGuest, (void **) &_ResetGuest);
     
-	 // Cam Xa
-	DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW.GamePlay"), OBFUSCATE("FollowCamera"), OBFUSCATE("get_OffsetForNormal"), 0),(void *)_GetCameraHeightRateValue, (void **)&GetCameraHeightRateValue);
+         // Cam Xa
+        DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW.GamePlay"), OBFUSCATE("FollowCamera"), OBFUSCATE("get_OffsetForNormal"), 0),(void *)_GetCameraHeightRateValue, (void **)&GetCameraHeightRateValue);
     
-	
-	
+        
+        
     // Bypass
     DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("UnityEngine.CoreModule.dll"), OBFUSCATE("UnityEngine"), OBFUSCATE("AndroidJNI"), OBFUSCATE("IsInstanceOf"), 2), (void *) &_Bypass, (void **) &Bypass);
     DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW.GamePlay"), OBFUSCATE("JPPGAJBAAKK"), OBFUSCATE("IsOnlineGame"), 2), (void *) &_Bypass, (void **) &Bypass);
@@ -614,8 +773,8 @@ DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW
     DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW"), OBFUSCATE("MobileReplayManager"), OBFUSCATE("GetGameTimeMS"), 0), (void *) &_FixGame, (void **) &FixGame);
     DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW"), OBFUSCATE("CreditPunishManager"), OBFUSCATE("ShowPunishWindow"), 0), (void *) &_FixGame, (void **) &FixGame);
 
-	
-	
+        
+        
     // Bypass Esp
     DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW.GamePlay"), OBFUSCATE("SceneGraphicsQuality"), OBFUSCATE("SetGraphicsQuality"), 0), (void *) _BypassESP, (void **) &BypassESP);
     DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("UnityEngine.CoreModule.dll"), OBFUSCATE("UnityEngine"), OBFUSCATE("Screen"), OBFUSCATE("SetResolution"), 0), (void *) _BypassESP, (void **) &BypassESP);
@@ -626,10 +785,10 @@ DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW
     DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("GCommon"), OBFUSCATE("PlatformUtility_Android"), OBFUSCATE("IsPackageInstalled"), 0), (void *) _Set_Aim, (void **) &Set_Aim);
     DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("GCommon"), OBFUSCATE("PlatformUtility_Android"), OBFUSCATE("CheckFileExists"), 0), (void *) _Set_Aim, (void **) &Set_Aim);
 //BLACKLIST FIX BYPASS
-	
-	
-	
-	MemoryPatch::createWithHex((uintptr_t)Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("AnoSDKNamespace"), OBFUSCATE("IOPOOHPNCKH"), OBFUSCATE("DPLMGOJKKCM"), 1), OBFUSCATE("C0 03 5F D6")).Modify();
+        
+        
+        
+        MemoryPatch::createWithHex((uintptr_t)Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("AnoSDKNamespace"), OBFUSCATE("IOPOOHPNCKH"), OBFUSCATE("DPLMGOJKKCM"), 1), OBFUSCATE("C0 03 5F D6")).Modify();
     MemoryPatch::createWithHex((uintptr_t)Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("AnoSDKNamespace"), OBFUSCATE("IOPOOHPNCKH"), OBFUSCATE("LBABEMNOJAJ"), 2), OBFUSCATE("C0 03 5F D6")).Modify();
     MemoryPatch::createWithHex((uintptr_t)Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("AnoSDKNamespace"), OBFUSCATE("IOPOOHPNCKH"), OBFUSCATE("HEKHGDOAMIN"), 3), OBFUSCATE("C0 03 5F D6")).Modify();
     MemoryPatch::createWithHex((uintptr_t)Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("AnoSDKNamespace"), OBFUSCATE("IOPOOHPNCKH"), OBFUSCATE("ANMKMIKMELA"), 0), OBFUSCATE("C0 03 5F D6")).Modify();
@@ -643,9 +802,9 @@ DobbyHook(Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW
     
     
 MemoryPatch::createWithHex((uintptr_t)Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW"), OBFUSCATE("GameConfig"), OBFUSCATE("get_ResetGuest"), 0), OBFUSCATE("20 00 80 D2 C0 03 5F D6")).Modify();
-	// DobbyHook((void *) (uintptr_t)Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW.GamePlay"), OBFUSCATE("Player"), OBFUSCATE("UpdateBehavior"), 2), (void *) hook_LateUpdate, (void **) &orig_LateUpdate);
+        // DobbyHook((void *) (uintptr_t)Il2CppGetMethodOffset(OBFUSCATE("Assembly-CSharp.dll"), OBFUSCATE("COW.GamePlay"), OBFUSCATE("Player"), OBFUSCATE("UpdateBehavior"), 2), (void *) hook_LateUpdate, (void **) &orig_LateUpdate);
     //hexPatches.Guest = MemoryPatch::createWithHex(getAbsoluteAddress("libil2cpp.so", 0x5ed140c),"20 00 80 D2 C0 03 5F D6");
-   	OpenURL = (void (*)(String *))Il2CppGetMethodOffset("UnityEngine.CoreModule.dll","UnityEngine","Application","OpenURL",1);
+        OpenURL = (void (*)(String *))Il2CppGetMethodOffset("UnityEngine.CoreModule.dll","UnityEngine","Application","OpenURL",1);
 
     ImGuiOK = true;
     
@@ -653,11 +812,11 @@ MemoryPatch::createWithHex((uintptr_t)Il2CppGetMethodOffset(OBFUSCATE("Assembly-
 
 
 void hack_thread(pid_t pid) {
-	
-	StartGUI();
-	while(pid == -1){pid = get_pid_by_name("com.dts.freefireth");} 
-	remote_inject(pid);
-	writeLog(to_string(pid));
+        
+        StartGUI();
+        while(pid == -1){pid = get_pid_by_name("com.dts.freefireth");} 
+        remote_inject(pid);
+        writeLog(to_string(pid));
     
 }
 
